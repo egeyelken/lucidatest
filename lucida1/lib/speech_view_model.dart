@@ -15,6 +15,15 @@ class SpeechViewModel extends ChangeNotifier {
   String get status => _status;
   String get response => _response;
 
+  SpeechViewModel() {
+    _initializeTTS();
+  }
+
+  void _initializeTTS() async {
+    await _flutterTts.setLanguage("en-US");
+    await _flutterTts.setPitch(1.0);
+  }
+
   void listen() async {
     if (!_isListening) {
       bool available = await _speech.initialize(
