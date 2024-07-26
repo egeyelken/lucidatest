@@ -26,6 +26,7 @@ class SpeechViewModel extends ChangeNotifier {
     await _flutterTts.setVolume(1.0);
     await _flutterTts.setSpeechRate(0.5);
     _flutterTts.setCompletionHandler(() {
+      print("TTS: Completed speaking");
       _isSpeaking = false;
       _status = 'Press the microphone to start speaking';
       notifyListeners();
@@ -69,10 +70,17 @@ class SpeechViewModel extends ChangeNotifier {
         );
       }
     } else {
+      _stopListening();
+    }
+  }
+
+  void _stopListening() async {
+    if (_isListening) {
+      await _speech.stop();
       _isListening = false;
       _status = 'Press the microphone to start speaking';
       notifyListeners();
-      await _speech.stop();
+      print('Stopped listening');
     }
   }
 
@@ -83,23 +91,45 @@ class SpeechViewModel extends ChangeNotifier {
     _response = _getResponse(userSpeech);
     print('Response: $_response');
     notifyListeners();
-    _speakResponse(_response);
+    await _speakResponse(_response);
   }
 
   Future<void> _speakResponse(String response) async {
-    try {
-      _isSpeaking = true;
-      await _flutterTts.speak(response);
-      await Future.delayed(Duration(seconds: 1)); // Add delay to avoid immediate re-listening
-    } catch (e) {
-      print("Error speaking: $e");
-      _status = 'Error speaking: $e';
+    int retryCount = 0;
+    bool success = false;
+
+    while (retryCount < 3 && !success) {
+      try {
+        _isSpeaking = true;
+        print("TTS: Stopping any ongoing speech");
+        await _flutterTts.stop(); // Ensure any ongoing TTS is stopped
+        print("TTS: About to speak response: $response");
+        var result = await _flutterTts.speak(response);
+        print("TTS: Speak result: $result");
+        if (result == 1) {
+          success = true;
+          print("TTS: Speech started successfully");
+        } else {
+          print("TTS: Speech failed to start");
+          retryCount++;
+        }
+        await Future.delayed(Duration(seconds: 2)); // Increase delay to avoid immediate re-listening
+      } catch (e) {
+        print("Error speaking: $e");
+        _status = 'Error speaking: $e';
+        notifyListeners();
+        retryCount++;
+      }
+    }
+
+    if (!success) {
+      print("TTS: Failed to speak after $retryCount retries");
+      _status = 'Failed to speak';
       notifyListeners();
     }
 
     // Reset state after response
-    _isListening = false;
-    _transcription = '';
+    _isSpeaking = false;
     _status = 'Press the microphone to start speaking';
     notifyListeners();
   }

@@ -31,7 +31,7 @@ dependencies:
   flutter:
     sdk: flutter
   speech_to_text: ^4.2.1
-  flutter_tts: ^3.3.0
+  flutter_tts: ^4.0.2
   provider: ^6.0.5
 
 
