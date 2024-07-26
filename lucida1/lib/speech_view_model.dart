@@ -6,6 +6,7 @@ class SpeechViewModel extends ChangeNotifier {
   stt.SpeechToText _speech = stt.SpeechToText();
   FlutterTts _flutterTts = FlutterTts();
   bool _isListening = false;
+  bool _isSpeaking = false;
   String _transcription = '';
   String _status = 'Press the microphone to start speaking';
   String _response = '';
@@ -22,7 +23,10 @@ class SpeechViewModel extends ChangeNotifier {
   void _initializeTTS() async {
     await _flutterTts.setLanguage("en-US");
     await _flutterTts.setPitch(1.0);
+    await _flutterTts.setVolume(1.0);
+    await _flutterTts.setSpeechRate(0.5);
     _flutterTts.setCompletionHandler(() {
+      _isSpeaking = false;
       _status = 'Press the microphone to start speaking';
       notifyListeners();
     });
@@ -34,7 +38,7 @@ class SpeechViewModel extends ChangeNotifier {
   }
 
   void listen() async {
-    if (!_isListening) {
+    if (!_isListening && !_isSpeaking) {
       bool available = await _speech.initialize(
         onStatus: (val) {
           print('onStatus: $val');
@@ -79,12 +83,14 @@ class SpeechViewModel extends ChangeNotifier {
     _response = _getResponse(userSpeech);
     print('Response: $_response');
     notifyListeners();
-    await _speakResponse(_response);
+    _speakResponse(_response);
   }
 
   Future<void> _speakResponse(String response) async {
     try {
+      _isSpeaking = true;
       await _flutterTts.speak(response);
+      await Future.delayed(Duration(seconds: 1)); // Add delay to avoid immediate re-listening
     } catch (e) {
       print("Error speaking: $e");
       _status = 'Error speaking: $e';
