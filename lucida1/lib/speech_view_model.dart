@@ -22,12 +22,22 @@ class SpeechViewModel extends ChangeNotifier {
   void _initializeTTS() async {
     await _flutterTts.setLanguage("en-US");
     await _flutterTts.setPitch(1.0);
+    _flutterTts.setCompletionHandler(() {
+      _status = 'Press the microphone to start speaking';
+      notifyListeners();
+    });
   }
 
   void listen() async {
     if (!_isListening) {
       bool available = await _speech.initialize(
-        onStatus: (val) => print('onStatus: $val'),
+        onStatus: (val) {
+          print('onStatus: $val');
+          if (val == 'notListening' && _isListening) {
+            _isListening = false;
+            notifyListeners();
+          }
+        },
         onError: (val) => print('onError: $val'),
       );
       if (available) {
@@ -35,13 +45,16 @@ class SpeechViewModel extends ChangeNotifier {
         _status = 'Listening...';
         notifyListeners();
         _speech.listen(
-          onResult: (val) {
+          onResult: (val) async {
             _transcription = val.recognizedWords;
+            print('Transcription: $_transcription');
             if (val.hasConfidenceRating && val.confidence > 0) {
               _transcription += ' (confidence: ${val.confidence})';
             }
-            _speech.stop(); // Stop listening once we have the result
-            _respondToSpeech(_transcription);
+            if (val.finalResult) {
+              await _speech.stop(); // Ensure the listening stops
+              _respondToSpeech(_transcription);
+            }
             notifyListeners();
           },
         );
@@ -50,7 +63,7 @@ class SpeechViewModel extends ChangeNotifier {
       _isListening = false;
       _status = 'Press the microphone to start speaking';
       notifyListeners();
-      _speech.stop();
+      await _speech.stop();
     }
   }
 
@@ -59,19 +72,24 @@ class SpeechViewModel extends ChangeNotifier {
     notifyListeners();
 
     _response = _getResponse(userSpeech);
-    await _flutterTts.speak(_response);
-
-    _status = 'Response given';
+    print('Response: $_response');
     notifyListeners();
+    await _speakResponse(_response);
+  }
+
+  Future<void> _speakResponse(String response) async {
+    await _flutterTts.speak(response);
 
     // Reset state after response
     _isListening = false;
     _transcription = '';
+    _status = 'Press the microphone to start speaking';
     notifyListeners();
   }
 
   String _getResponse(String userSpeech) {
-    userSpeech = userSpeech.toLowerCase();
+    userSpeech = userSpeech.toLowerCase().trim();
+    print('Processed user speech: $userSpeech');
     if (userSpeech.contains('hello')) {
       return 'Hello! How can I assist you?';
     } else if (userSpeech.contains('weather')) {
