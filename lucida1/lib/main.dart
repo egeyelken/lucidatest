@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'speech_view_model.dart';
 import 'theme_provider.dart';
+import 'pulsating_button.dart';
 
 void main() {
   runApp(MyApp());
@@ -35,7 +36,7 @@ class HomeScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final viewModel = Provider.of<SpeechViewModel>(context);
     final themeProvider = Provider.of<ThemeProvider>(context);
-    
+
     return Scaffold(
       appBar: AppBar(
         title: Text('Lucida AI Assistant'),
@@ -75,14 +76,9 @@ class HomeScreen extends StatelessWidget {
             children: [
               Text(viewModel.status),
               SizedBox(height: 20),
-              ElevatedButton(
-                onPressed: () {
-                  viewModel.listen();
-                },
-                child: Icon(
-                  viewModel.isListening ? Icons.mic : Icons.mic_none,
-                  size: 36,
-                ),
+              PulsatingButton(
+                isListening: viewModel.isListening,
+                onPressed: viewModel.listen,
               ),
               SizedBox(height: 20),
               if (viewModel.transcription.isNotEmpty)
