@@ -26,6 +26,11 @@ class SpeechViewModel extends ChangeNotifier {
       _status = 'Press the microphone to start speaking';
       notifyListeners();
     });
+    _flutterTts.setErrorHandler((msg) {
+      print("TTS Error: $msg");
+      _status = 'TTS Error: $msg';
+      notifyListeners();
+    });
   }
 
   void listen() async {
@@ -78,7 +83,13 @@ class SpeechViewModel extends ChangeNotifier {
   }
 
   Future<void> _speakResponse(String response) async {
-    await _flutterTts.speak(response);
+    try {
+      await _flutterTts.speak(response);
+    } catch (e) {
+      print("Error speaking: $e");
+      _status = 'Error speaking: $e';
+      notifyListeners();
+    }
 
     // Reset state after response
     _isListening = false;
