@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'speech_view_model.dart';
+import 'theme_provider.dart';
 
 void main() {
   runApp(MyApp());
@@ -9,14 +10,21 @@ void main() {
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (_) => SpeechViewModel(),
-      child: MaterialApp(
-        title: 'Lucida AI Assistant',
-        theme: ThemeData(
-          primarySwatch: Colors.blue,
-        ),
-        home: HomeScreen(),
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => SpeechViewModel()),
+        ChangeNotifierProvider(create: (_) => ThemeProvider()),
+      ],
+      child: Consumer<ThemeProvider>(
+        builder: (context, themeProvider, child) {
+          return MaterialApp(
+            title: 'Lucida AI Assistant',
+            theme: ThemeData.light(),
+            darkTheme: ThemeData.dark(),
+            themeMode: themeProvider.themeMode,
+            home: HomeScreen(),
+          );
+        },
       ),
     );
   }
@@ -26,9 +34,38 @@ class HomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final viewModel = Provider.of<SpeechViewModel>(context);
+    final themeProvider = Provider.of<ThemeProvider>(context);
+    
     return Scaffold(
       appBar: AppBar(
         title: Text('Lucida AI Assistant'),
+      ),
+      drawer: Drawer(
+        child: ListView(
+          padding: EdgeInsets.zero,
+          children: <Widget>[
+            DrawerHeader(
+              decoration: BoxDecoration(
+                color: Theme.of(context).primaryColor,
+              ),
+              child: Text(
+                'Settings',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 24,
+                ),
+              ),
+            ),
+            ListTile(
+              leading: Icon(Icons.brightness_6),
+              title: Text('Toggle Theme'),
+              onTap: () {
+                themeProvider.toggleTheme();
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        ),
       ),
       body: Center(
         child: Padding(

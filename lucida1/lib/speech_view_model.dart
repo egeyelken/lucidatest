@@ -95,36 +95,22 @@ class SpeechViewModel extends ChangeNotifier {
   }
 
   Future<void> _speakResponse(String response) async {
-    int retryCount = 0;
-    bool success = false;
-
-    while (retryCount < 3 && !success) {
-      try {
-        _isSpeaking = true;
-        print("TTS: Stopping any ongoing speech");
-        await _flutterTts.stop(); // Ensure any ongoing TTS is stopped
-        print("TTS: About to speak response: $response");
-        var result = await _flutterTts.speak(response);
-        print("TTS: Speak result: $result");
-        if (result == 1) {
-          success = true;
-          print("TTS: Speech started successfully");
-        } else {
-          print("TTS: Speech failed to start");
-          retryCount++;
-        }
-        await Future.delayed(Duration(seconds: 2)); // Increase delay to avoid immediate re-listening
-      } catch (e) {
-        print("Error speaking: $e");
-        _status = 'Error speaking: $e';
-        notifyListeners();
-        retryCount++;
+    try {
+      _isSpeaking = true;
+      print("TTS: Stopping any ongoing speech");
+      await _flutterTts.stop(); // Ensure any ongoing TTS is stopped
+      print("TTS: About to speak response: $response");
+      var result = await _flutterTts.speak(response);
+      print("TTS: Speak result: $result");
+      if (result == 1) {
+        print("TTS: Speech started successfully");
+      } else {
+        print("TTS: Speech failed to start");
       }
-    }
-
-    if (!success) {
-      print("TTS: Failed to speak after $retryCount retries");
-      _status = 'Failed to speak';
+      await Future.delayed(Duration(seconds: 2)); // Increase delay to avoid immediate re-listening
+    } catch (e) {
+      print("Error speaking: $e");
+      _status = 'Error speaking: $e';
       notifyListeners();
     }
 
