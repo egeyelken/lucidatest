@@ -62,11 +62,13 @@ class SpeechViewModel extends ChangeNotifier {
               _transcription += ' (confidence: ${val.confidence})';
             }
             if (val.finalResult) {
-              await _speech.stop(); // Ensure the listening stops
+              await _stopListening(); // Ensure the listening stops
               _respondToSpeech(_transcription);
             }
             notifyListeners();
           },
+          listenFor: Duration(seconds: 10), // Adjust this duration as needed
+          pauseFor: Duration(seconds: 2), // Adjust the pause duration
         );
       }
     } else {
@@ -74,7 +76,7 @@ class SpeechViewModel extends ChangeNotifier {
     }
   }
 
-  void _stopListening() async {
+  Future<void> _stopListening() async {
     if (_isListening) {
       await _speech.stop();
       _isListening = false;
@@ -127,7 +129,9 @@ class SpeechViewModel extends ChangeNotifier {
       return 'Hello! How can I assist you?';
     } else if (userSpeech.contains('weather')) {
       return 'The weather today is sunny.';
-    } else {
+    } else if (userSpeech.contains('bye')){
+      return 'Goodbye!';
+   } else  {
       return 'I did not understand that. Please repeat.';
     }
   }
