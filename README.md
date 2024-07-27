@@ -1,1 +1,24 @@
-a
+# Lucida AI Assistant
+
+A Flutter application that utilizes speech recognition and text-to-speech functionalities to create an AI assistant. This project includes features such as theme toggling and a pulsating microphone button when listening.
+
+## Features
+
+- **Speech Recognition**: Recognizes and processes spoken words.
+- **Text-to-Speech (TTS)**: Converts text responses to speech.
+- **Theme Toggling**: Switch between light and dark themes.
+- **Pulsating Microphone Button**: Animated button when the app is listening.
+
+## Prerequisites
+
+- Flutter SDK: [Install Flutter](https://flutter.dev/docs/get-started/install)
+- Xcode: Latest version from the Mac App Store
+- CocoaPods: [Install CocoaPods](https://guides.cocoapods.org/using/getting-started.html#installation)
+
+## Getting Started
+
+### Clone the Repository
+
+```sh
+git clone https://github.com/yourusername/lucida_ai_assistant.git
+cd lucida_ai_assistant
