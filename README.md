@@ -24,4 +24,23 @@ git clone [https://github.com/yourusername/lucida_ai_assistant.git](https://gith
 cd lucidatest
 cd lucida1
 
+### Install Dependencies
+flutter pub get
+cd ios
+pod install
+cd ..
+
+
+### Configure iOS Permissions
+Ensure the following keys are present in your Info.plist file for microphone and speech recognition permissions:
+
+<key>NSMicrophoneUsageDescription</key>
+<string>We need access to your microphone for speech recognition.</string>
+<key>NSSpeechRecognitionUsageDescription</key>
+<string>We need access to speech recognition services.</string>
+<key>NSSpeechSynthesizerUsageDescription</key>
+<string>We need access to speech synthesis services.</string>
+
+### Run the App
+flutter run
 
