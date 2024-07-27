@@ -20,7 +20,7 @@ A Flutter application that utilizes speech recognition and text-to-speech functi
 ### Clone the Repository
 
 ```sh
-git clone [https://github.com/yourusername/lucida_ai_assistant.git](https://github.com/egeyelken/lucidatest.git)
+git clone https://github.com/egeyelken/lucidatest.git
 cd lucidatest
 cd lucida1
 
